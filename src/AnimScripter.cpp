@@ -1405,6 +1405,7 @@ int AnimScripter<dim>::stepAnimScript(Mesh<dim>& mesh,
 {
     stepStartTime = stepEndTime;
     stepEndTime += dt;
+    std::cout << "Start Time" << stepStartTime << std::endl;
 
     searchDir.setZero(mesh.V.rows() * dim);
     int returnFlag = 0;
@@ -1428,8 +1429,25 @@ int AnimScripter<dim>::stepAnimScript(Mesh<dim>& mesh,
 
         // move objects with scripted linear velocity
         for (const auto& scriptedLVelI : mesh.componentLVels) {
+            bool inputTake;
+            Eigen::Vector3d inputLVelIMatrix;
+            if (stepStartTime >= dt) {
+            std::cin >> inputTake;
+                if (inputTake) {
+                    double vx, vy, vz;
+                    std::cin >> vx >> vy >> vz;    
+                    inputLVelIMatrix << vx, vy, vz;
+                }
+            }
             for (int i = scriptedLVelI.first[1]; i < scriptedLVelI.first[2]; ++i) {
-                searchDir.template segment<dim>(i * dim) += scriptedLVelI.second * dt;
+                if (stepStartTime >= dt) {
+                    if(inputTake) { 
+                    searchDir.template segment<dim>(i * dim) += inputLVelIMatrix * dt;
+                    }
+                }
+                else {
+                   searchDir.template segment<dim>(i * dim) += scriptedLVelI.second * dt; 
+                }
             }
         }
 
